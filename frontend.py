@@ -1,10 +1,11 @@
 import streamlit as st
-import backend
+import requests
+import os
 import time
 from typing import Optional
 
 g_user_mail : Optional[str] = None
-
+BACKEND_URL = os.getenv("BACKEND_URL")
 
 st.set_page_config(page_title="Smart AI Chatbot", page_icon=":robot_face:", layout="wide")
 
@@ -19,6 +20,8 @@ if "logged_in" not in st.session_state:
     st.session_state.is_guest = False
     st.session_state.token = None
     st.session_state.messages = []
+    st.session_state.email = ""
+    st.session_state.username = ""
 
 
 st.markdown("""
@@ -58,12 +61,15 @@ if st.session_state.get("pending_prompt"):
 
             if st.button("Login", key="login_button"):
                 if user_mail and user_password:
-                    user_exists = backend.login_user(user_mail, user_password)
+                    res = requests.post(f"{BACKEND_URL}/login", json={"email": user_mail, "password": user_password})
+                    data = res.json()
+                    user_exists = data["status"]
                     if user_exists == "True":
                         st.session_state.logged_in = True
                         st.session_state.is_guest = False
                         st.session_state.username = user_mail
-                        st.session_state.token = backend.create_access_token({"sub": user_mail})
+                        st.session_state.email = user_mail
+                        token = data.get("token")
                         st.success("Logged in successfully!")
                         g_user_mail = user_mail
                         st.rerun()
@@ -86,8 +92,13 @@ if st.session_state.get("pending_prompt"):
                 elif new_password != confirm_password:
                     st.error("Passwords do not match.")
                 else:
-                    if backend.register_user(new_mail, new_password):
+                    res = requests.post(f"{BACKEND_URL}/register", json={"email": new_mail, "password": new_password})
+                    data = res.json()
+                    result = data["status"]
+                    if result:
                         st.success("Registration successful! Please login to continue.")
+                        st.session_state.email = new_mail
+                        st.session_state.username = new_mail
                     else:
                         st.error("User already exists. Please login to continue.")
 
@@ -95,7 +106,8 @@ if st.session_state.get("pending_prompt"):
             st.subheader("Continue as Guest")
             st.write("You can continue as a guest without creating an account. However, your chat history will not be saved after you leave the session.")
             if st.button("Continue as Guest", key="guest_button"):
-                guest_id = backend.create_guest_user()
+                res = requests.post(f"{BACKEND_URL}/guest")
+                guest_id = res.json()["user_id"]
                 st.session_state.logged_in = True
                 st.session_state.is_guest = True
                 st.session_state.guest_user_id = guest_id
@@ -114,9 +126,17 @@ if st.session_state.get("pending_prompt"):
 
     with st.spinner("Chikku is thinking..."):
         if st.session_state.is_guest:
-            response = backend.guest_chatbot(backend.userQuery(question=actual_prompt), st.session_state.guest_user_id)
+            res = requests.post(f"{BACKEND_URL}/guest-chatbot",
+                json={"question": actual_prompt},
+                params={"user_id": st.session_state.guest_user_id}
+            )
+            response = res.json()
         else:
-            response = backend.Chatbot(backend.userQuery(question=actual_prompt), st.session_state.username)
+            res = requests.post(f"{BACKEND_URL}/Chatbot", 
+                json={"question": actual_prompt},
+                params={"email": st.session_state.email}
+            )
+            response = res.json()
 
     with st.chat_message("assistant"):
         placeholder = st.empty()

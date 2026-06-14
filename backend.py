@@ -8,6 +8,7 @@ from jose import jwt
 from datetime import datetime,timedelta
 import psycopg2
 import uuid
+from fastapi.middleware.cors import CORSMiddleware
 from passlib.context import CryptContext
 
 global_user_id = None
@@ -27,9 +28,28 @@ load_dotenv()
 client = Groq(api_key = os.getenv("GROK API KEY"))
 
 app = FastAPI(title = 'Smart AI Chatbot')
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://your-render-app.onrender.com"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class userQuery(BaseModel):
     question : str = Field(...,min_length = 1)
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+class RegisterRequest(BaseModel):
+    email: str
+    password: str
 
 def buildPrompt(query : str) -> str:
     return f'''
@@ -56,6 +76,24 @@ def call_llm(prompt : str) -> str:
         frequency_penalty=0.0
     )
     return completion.choices[0].message.content
+
+@app.post('/login')
+def login(request: LoginRequest):
+    result = login_user(request.email, request.password)
+    if result == "True":
+        token = create_access_token({"sub": request.email})
+        return {"status": "True", "token": token, "user_id": global_user_id}
+    return {"status": result}
+
+@app.post('/register')
+def register(request: RegisterRequest):
+    result = register_user(request.email, request.password)
+    return {"status": result}
+
+@app.post('/guest')
+def guest():
+    user_id = create_guest_user()
+    return {"user_id": user_id}
 
 
 @app.post('/Chatbot')
