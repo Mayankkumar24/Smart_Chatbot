@@ -1,9 +1,12 @@
 import streamlit as st
 import requests
 import os
-import time
+import time 
 from typing import Optional
+from dotenv import load_dotenv
+import json
 
+load_dotenv()
 g_user_mail : Optional[str] = None
 BACKEND_URL = os.getenv("BACKEND_URL")
 
