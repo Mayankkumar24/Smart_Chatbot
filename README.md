@@ -1,6 +1,6 @@
 # 🤖 Smart AI Chatbot — Chikku
 
-A full-stack AI-powered chatbot application built with FastAPI, Streamlit, and PostgreSQL. Meet **Chikku** — your smart, friendly AI assistant powered by **LLaMA 3.1** via Groq.
+A full-stack AI-powered chatbot application built with FastAPI, Streamlit, and PostgreSQL. Meet **Chikku** — your smart, friendly AI assistant powered by **gpt-oss-20b** via Groq.
 
 ---
 
@@ -28,7 +28,7 @@ Render.com                  AWS EC2 (t3.micro)
 
 ## ✨ Features
 
-- 💬 Real-time AI chat powered by LLaMA 3.1 via Groq
+- 💬 Real-time AI chat powered by gpt-oss-20b via Groq
 - 🔐 User authentication (Register / Login) with JWT tokens
 - 👤 Guest mode — chat without creating an account
 - 💾 Persistent chat history stored in PostgreSQL
@@ -44,7 +44,7 @@ Render.com                  AWS EC2 (t3.micro)
 | Frontend | Streamlit                                |
 | Backend  | FastAPI                                  |
 | Database | PostgreSQL (AWS RDS)                     |
-| LLM      | LLaMA 3.1 Instant (via Groq)             |
+| LLM      | gpt-oss-20b (via Groq)             |
 | Auth     | JWT (python-jose)                        |
 | Hosting  | Render.com (Frontend), AWS EC2 (Backend) |
 
