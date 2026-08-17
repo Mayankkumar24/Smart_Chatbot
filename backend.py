@@ -65,15 +65,12 @@ def buildPrompt(query : str) -> str:
 
 def call_llm(prompt : str) -> str:
     completion = client.chat.completions.create(
-        model="llama-3.1-8b-instant",
+        model="gpt-oss-20b",
         messages=[
             {"role": "user", "content": prompt}
         ],
-        temperature=0.5,
-        top_p=0.9,
+        temperature=0.7,
         max_tokens=1024,
-        presence_penalty=0.0,
-        frequency_penalty=0.0
     )
     return completion.choices[0].message.content
 
