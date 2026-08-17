@@ -65,7 +65,7 @@ def buildPrompt(query : str) -> str:
 
 def call_llm(prompt : str) -> str:
     completion = client.chat.completions.create(
-        model="gpt-oss-20b",
+        model="openai/gpt-oss-20b",
         messages=[
             {"role": "user", "content": prompt}
         ],
