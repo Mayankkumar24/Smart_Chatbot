@@ -25,7 +25,7 @@ def create_access_token(data : dict):
     return token
 
 load_dotenv()
-client = Groq(api_key = os.getenv("GROK API KEY"))
+client = Groq(api_key = os.getenv("GROK_API_KEY"))
 
 app = FastAPI(title = 'Smart AI Chatbot')
 from fastapi.middleware.cors import CORSMiddleware
