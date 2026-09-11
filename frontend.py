@@ -9,6 +9,7 @@ import json
 load_dotenv()
 g_user_mail : Optional[str] = None
 BACKEND_URL = os.getenv("BACKEND_URL")
+SERVICE_MIGRATING = True
 
 st.set_page_config(page_title="Smart AI Chatbot", page_icon=":robot_face:", layout="wide")
 
@@ -40,6 +41,14 @@ st.markdown("""
     <span class="word" style="animation-delay: 2.8s;">🤖</span>
 </div>
 """, unsafe_allow_html=True)
+
+if SERVICE_MIGRATING:
+    st.info(
+        "**Service migration in progress**\n\n"
+        "Chikku is moving to a new server, so chat and account services are temporarily unavailable. "
+        "The chatbot is expected to be back in operation late night on **12 September 2026**."
+    )
+    st.stop()
 
 
 for message in st.session_state.messages:
