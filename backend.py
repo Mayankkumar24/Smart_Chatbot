@@ -33,7 +33,7 @@ from fastapi.middleware.cors import CORSMiddleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://your-render-app.onrender.com"
+        "https://smart-chatbot-frontend-sp03.onrender.com"
     ],
     allow_credentials=True,
     allow_methods=["*"],
