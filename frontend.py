@@ -9,7 +9,7 @@ import json
 load_dotenv()
 g_user_mail : Optional[str] = None
 BACKEND_URL = os.getenv("BACKEND_URL")
-SERVICE_MIGRATING = True
+SERVICE_MIGRATING = False
 
 st.set_page_config(page_title="Smart AI Chatbot", page_icon=":robot_face:", layout="wide")
 
