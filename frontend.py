@@ -11,6 +11,21 @@ g_user_mail : Optional[str] = None
 BACKEND_URL = os.getenv("BACKEND_URL")
 SERVICE_MIGRATING = False
 
+
+def get_response_data(response, action):
+    if not response.ok:
+        st.error(f"Unable to {action}. The backend returned HTTP {response.status_code}.")
+        st.stop()
+
+    try:
+        return response.json()
+    except ValueError:
+        st.error(
+            f"Unable to {action}. The backend returned an invalid response. "
+            "Please try again later."
+        )
+        st.stop()
+
 st.set_page_config(page_title="Smart AI Chatbot", page_icon=":robot_face:", layout="wide")
 
 try:
@@ -74,7 +89,7 @@ if st.session_state.get("pending_prompt"):
             if st.button("Login", key="login_button"):
                 if user_mail and user_password:
                     res = requests.post(f"{BACKEND_URL}/login", json={"email": user_mail, "password": user_password})
-                    data = res.json()
+                    data = get_response_data(res, "log in")
                     user_exists = data["status"]
                     if user_exists == "True":
                         st.session_state.logged_in = True
@@ -105,7 +120,7 @@ if st.session_state.get("pending_prompt"):
                     st.error("Passwords do not match.")
                 else:
                     res = requests.post(f"{BACKEND_URL}/register", json={"email": new_mail, "password": new_password})
-                    data = res.json()
+                    data = get_response_data(res, "register")
                     result = data["status"]
                     if result:
                         st.success("Registration successful! Please login to continue.")
@@ -119,7 +134,8 @@ if st.session_state.get("pending_prompt"):
             st.write("You can continue as a guest without creating an account. However, your chat history will not be saved after you leave the session.")
             if st.button("Continue as Guest", key="guest_button"):
                 res = requests.post(f"{BACKEND_URL}/guest")
-                guest_id = res.json()["user_id"]
+                data = get_response_data(res, "continue as a guest")
+                guest_id = data["user_id"]
                 st.session_state.logged_in = True
                 st.session_state.is_guest = True
                 st.session_state.guest_user_id = guest_id
@@ -142,13 +158,13 @@ if st.session_state.get("pending_prompt"):
                 json={"question": actual_prompt},
                 params={"user_id": st.session_state.guest_user_id}
             )
-            response = res.json()
+            response = get_response_data(res, "send your message")
         else:
             res = requests.post(f"{BACKEND_URL}/Chatbot", 
                 json={"question": actual_prompt},
                 params={"email": st.session_state.email}
             )
-            response = res.json()
+            response = get_response_data(res, "send your message")
 
     with st.chat_message("assistant"):
         placeholder = st.empty()
