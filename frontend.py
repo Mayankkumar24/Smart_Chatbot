@@ -9,7 +9,7 @@ import json
 load_dotenv()
 g_user_mail : Optional[str] = None
 BACKEND_URL = os.getenv("BACKEND_URL")
-SERVICE_MIGRATING = False
+SERVICE_MIGRATING = True;
 
 
 def get_response_data(response, action):
