@@ -9,7 +9,7 @@ import json
 load_dotenv()
 g_user_mail : Optional[str] = None
 BACKEND_URL = os.getenv("BACKEND_URL")
-SERVICE_MIGRATING = False;
+SERVICE_MIGRATING = True;
 
 
 def get_response_data(response, action):
@@ -61,7 +61,7 @@ if SERVICE_MIGRATING:
     st.info(
         "**Service migration in progress**\n\n"
         "Chikku is moving to a new server, so chat and account services are temporarily unavailable. "
-        "The chatbot is expected to be back in operation late night on **12 September 2026**."
+        "The chatbot is expected to be back in operation late night on **14 September 2026**."
     )
     st.stop()
 
