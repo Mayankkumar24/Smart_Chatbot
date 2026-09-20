@@ -70,7 +70,7 @@ if SERVICE_MIGRATING:
 if not st.session_state.backend_ready:
     st.warning("⚡ Backend is asleep (free-tier hosting). Click below to wake it up before chatting.")
     if st.button("🚀 Start Backend"):
-        max_attempts = 4
+        max_attempts = 8
         wait_between = 15  # seconds
 
         with st.spinner("Waking up backend... this can take up to 60-90 seconds on cold start."):
