@@ -70,17 +70,29 @@ if SERVICE_MIGRATING:
 if not st.session_state.backend_ready:
     st.warning("⚡ Backend is asleep (free-tier hosting). Click below to wake it up before chatting.")
     if st.button("🚀 Start Backend"):
-        with st.spinner("Waking up backend... this can take up to 50 seconds on cold start."):
-            try:
-                res = requests.get(f"{BACKEND_URL}/health", timeout=90)
-                if res.ok:
-                    st.session_state.backend_ready = True
-                    st.success("Backend is up!")
-                    st.rerun()
-                else:
-                    st.error(f"Backend returned HTTP {res.status_code}. Try again.")
-            except requests.exceptions.RequestException as e:
-                st.error(f"Could not reach backend: {e}")
+        max_attempts = 4
+        wait_between = 15  # seconds
+
+        with st.spinner("Waking up backend... this can take up to 60-90 seconds on cold start."):
+            success = False
+            for attempt in range(1, max_attempts + 1):
+                try:
+                    res = requests.get(f"{BACKEND_URL}/health", timeout=30)
+                    if res.ok:
+                        success = True
+                        break
+                    # 502/503 = backend still booting, Render proxy not ready yet
+                except requests.exceptions.RequestException:
+                    pass  # connection refused / timeout during boot — keep retrying
+
+                time.sleep(wait_between)
+
+        if success:
+            st.session_state.backend_ready = True
+            st.success("Backend is up!")
+            st.rerun()
+        else:
+            st.error("Backend didn't wake up in time. Please try again — cold starts can occasionally take longer.")
     st.stop()
 
 
