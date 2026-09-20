@@ -41,6 +41,7 @@ if "logged_in" not in st.session_state:
     st.session_state.messages = []
     st.session_state.email = ""
     st.session_state.username = ""
+    st.session_state.backend_ready = False
 
 
 st.markdown("""
@@ -57,12 +58,29 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+
 if SERVICE_MIGRATING:
     st.info(
         "**Service migration in progress**\n\n"
         "Chikku is moving to a new server, so chat and account services are temporarily unavailable. "
         "The chatbot is expected to be back in operation late night on **19 September 2026**."
     )
+    st.stop()
+
+if not st.session_state.backend_ready:
+    st.warning("⚡ Backend is asleep (free-tier hosting). Click below to wake it up before chatting.")
+    if st.button("🚀 Start Backend"):
+        with st.spinner("Waking up backend... this can take up to 50 seconds on cold start."):
+            try:
+                res = requests.get(f"{BACKEND_URL}/health", timeout=90)
+                if res.ok:
+                    st.session_state.backend_ready = True
+                    st.success("Backend is up!")
+                    st.rerun()
+                else:
+                    st.error(f"Backend returned HTTP {res.status_code}. Try again.")
+            except requests.exceptions.RequestException as e:
+                st.error(f"Could not reach backend: {e}")
     st.stop()
 
 

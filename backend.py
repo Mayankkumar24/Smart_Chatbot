@@ -74,6 +74,10 @@ def call_llm(prompt : str) -> str:
     )
     return completion.choices[0].message.content
 
+@app.get("/health")
+def health():
+    return {"status" : "Ok"}
+
 @app.post('/login')
 def login(request: LoginRequest):
     result = login_user(request.email, request.password)
