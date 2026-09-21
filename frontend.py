@@ -5,6 +5,8 @@ import time
 from typing import Optional
 from dotenv import load_dotenv
 import json
+import streamlit.components.v1 as components
+
 
 load_dotenv()
 g_user_mail : Optional[str] = None
@@ -70,31 +72,40 @@ if SERVICE_MIGRATING:
 
 if not st.session_state.backend_ready:
     st.warning("⚡ Backend is asleep. Click below to wake it up before chatting.")
+
     if st.button("🚀 Start Backend"):
+        # Fire the wake-up request from the USER'S actual browser, not from Streamlit's server
+        components.html(f"""
+            <script>
+            fetch("{BACKEND_URL}/health", {{mode: "no-cors"}}).catch(function(e) {{}});
+            </script>
+        """, height=0)
+
         max_attempts = 15
         wait_between = 15
         log_box = st.empty()
         logs = []
         success = False
 
-        for attempt in range(1, max_attempts + 1):
-            try:
-                res = requests.get(f"{BACKEND_URL}/health", timeout=25)
-                logs.append(f"Attempt {attempt}: HTTP {res.status_code}")
-                if res.ok:
-                    success = True
-                    break
-            except Exception as e:
-                logs.append(f"Attempt {attempt}: {type(e).__name__} — {e}")
-            log_box.code("\n".join(logs))
-            time.sleep(wait_between)
+        with st.spinner("Waking up backend... this can take up to 2 minutes."):
+            for attempt in range(1, max_attempts + 1):
+                try:
+                    res = requests.get(f"{BACKEND_URL}/health", timeout=25)
+                    logs.append(f"Attempt {attempt}: HTTP {res.status_code}")
+                    if res.ok:
+                        success = True
+                        break
+                except Exception as e:
+                    logs.append(f"Attempt {attempt}: {type(e).__name__}")
+                log_box.code("\n".join(logs))
+                time.sleep(wait_between)
 
         if success:
             st.session_state.backend_ready = True
             st.success("Backend is up!")
             st.rerun()
         else:
-            st.error("Failed after all attempts.")
+            st.error("Backend didn't wake up in time. Please try again.")
     st.stop()
 
 
