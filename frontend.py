@@ -27,7 +27,7 @@ def get_response_data(response, action):
         st.stop()
 
 st.set_page_config(page_title="Smart AI Chatbot", page_icon=":robot_face:", layout="wide")
-st.write(f"DEBUG BACKEND_URL = '{BACKEND_URL}'")
+# st.write(f"DEBUG BACKEND_URL = '{BACKEND_URL}'")
 
 try:
     with open("style.css", "r") as f:
@@ -69,31 +69,32 @@ if SERVICE_MIGRATING:
     st.stop()
 
 if not st.session_state.backend_ready:
-    st.warning("⚡ Backend is asleep (free-tier hosting). Click below to wake it up before chatting.")
+    st.warning("⚡ Backend is asleep. Click below to wake it up before chatting.")
     if st.button("🚀 Start Backend"):
-        max_attempts = 20
-        wait_between = 15  # seconds
+        max_attempts = 15
+        wait_between = 15
+        log_box = st.empty()
+        logs = []
+        success = False
 
-        with st.spinner("Waking up backend... this can take up to 60-90 seconds on cold start."):
-            success = False
-            for attempt in range(1, max_attempts + 1):
-                try:
-                    res = requests.get(f"{BACKEND_URL}/health", timeout=30)
-                    if res.ok:
-                        success = True
-                        break
-                    # 502/503 = backend still booting, Render proxy not ready yet
-                except requests.exceptions.RequestException:
-                    pass  # connection refused / timeout during boot — keep retrying
-
-                time.sleep(wait_between)
+        for attempt in range(1, max_attempts + 1):
+            try:
+                res = requests.get(f"{BACKEND_URL}/health", timeout=25)
+                logs.append(f"Attempt {attempt}: HTTP {res.status_code}")
+                if res.ok:
+                    success = True
+                    break
+            except Exception as e:
+                logs.append(f"Attempt {attempt}: {type(e).__name__} — {e}")
+            log_box.code("\n".join(logs))
+            time.sleep(wait_between)
 
         if success:
             st.session_state.backend_ready = True
             st.success("Backend is up!")
             st.rerun()
         else:
-            st.error("Backend didn't wake up in time. Please try again — cold starts can occasionally take longer.")
+            st.error("Failed after all attempts.")
     st.stop()
 
 
