@@ -27,6 +27,7 @@ def get_response_data(response, action):
         st.stop()
 
 st.set_page_config(page_title="Smart AI Chatbot", page_icon=":robot_face:", layout="wide")
+st.write(f"DEBUG BACKEND_URL = '{BACKEND_URL}'")
 
 try:
     with open("style.css", "r") as f:
